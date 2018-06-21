@@ -4,7 +4,7 @@
 
 import numpy as np
 import operator
-from os import listdir
+import os
 
 def createDataSet():
     group = np.array([[1.0, 1.1], [1.0, 1.0], [0, 0], [0, 0.1]])
@@ -38,9 +38,35 @@ def classify0(inx,dataSet,labels,k):
     return sortedClassCount[0][0]
 
 
+# 读取分离训练数据中的特征与标签
+def file2matrix(filename):
+    fr = open(filename)
+    arrayOfLines = fr.readlines()
+    numberOfLines = len(arrayOfLines)
+    returnMat = np.zeros((numberOfLines,3))
+    classLabelVector = []
+    index = 0
+    for line in arrayOfLines:
+        line = line.strip()
+        listFromLine = line.split('\t')
+        # 前3列为特征
+        returnMat[index,:] = listFromLine[0:3]
+        # 最后一列为标签,需要字符串转为数值
+        classLabelVector.append(int(listFromLine[-1]))
+        index += 1
+    return returnMat,classLabelVector
+
+
 # 测试classify0方法
 if __name__ == '__main__':
     group,labels = createDataSet()
     result = classify0([0,0],group,labels,2)
     print("预测结果为:"+result)
+    # print(os.getcwd())
+    # print(os.path.dirname(os.getcwd()))
+    rootDir = os.path.dirname(os.getcwd())
+    # 不喜欢,魅力一般的人,极具魅力的人分别使用 1,2,3编号
+    returnMat,classLabelVector = file2matrix(os.path.dirname(rootDir)+'\\data\\datingTestSet2.txt')
+
+
 
