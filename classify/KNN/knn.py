@@ -5,6 +5,8 @@
 import numpy as np
 import operator
 import os
+import matplotlib
+import matplotlib.pyplot as plt
 
 def createDataSet():
     group = np.array([[1.0, 1.1], [1.0, 1.0], [0, 0], [0, 0.1]])
@@ -57,6 +59,55 @@ def file2matrix(filename):
     return returnMat,classLabelVector
 
 
+
+# 数据集数值归一化
+def autoNorm(dataSet):
+    minVals = dataSet.min(0)
+    maxVals = dataSet.max(0)
+    ranges = maxVals - minVals
+    normDataSet = np.zeros(np.shape(dataSet))
+    m = dataSet.shape[0]
+    # 数据集向量减去最小值的向量 再除以最大差值向量
+    normDataSet = dataSet - np.tile(minVals,(m,1))
+    normDataSet = normDataSet/np.tile(ranges,(m,1))
+    return normDataSet,ranges,minVals
+
+
+# 使用数据集中测试数据集查看错误率
+def datingClassTest(filename):
+    hoRatio = 0.10
+    datingDataMat,datingLabels = file2matrix(filename)
+    normDataSet,ranges,minVals = autoNorm(datingDataMat)
+    m = normDataSet.shape[0]
+    numTestVecs = int(m*hoRatio)
+    errorCount = 0
+
+    for i in range(numTestVecs):
+        classifierResult = classify0(normDataSet[i,:],normDataSet[numTestVecs:m,:],datingLabels[numTestVecs:m],3)
+        if(classifierResult != datingLabels[i]):
+            errorCount += 1
+    print("the total error rate is:%f"%(errorCount/float(numTestVecs)))
+
+
+
+# 图片矩阵转为向量
+def image2vector(filename):
+    returnVect = np.zeros((1,1024))
+    fr = open(filename)
+    for i in range(32):
+        lineStr = fr.readline()
+        for j in range(32):
+            returnVect[0,32*i+j] = int(lineStr[j])
+    return returnVect
+
+# kNN识别手写体
+def handWritingClassTest():
+    hwlabels = []
+    trainingFileList = os.listdir('trainingDigits')
+    m = len(trainingFileList)
+
+
+
 # 测试classify0方法
 if __name__ == '__main__':
     group,labels = createDataSet()
@@ -65,8 +116,18 @@ if __name__ == '__main__':
     # print(os.getcwd())
     # print(os.path.dirname(os.getcwd()))
     rootDir = os.path.dirname(os.getcwd())
+    dataFullDir = os.path.dirname(rootDir)+'\\data\\datingTestSet2.txt'
     # 不喜欢,魅力一般的人,极具魅力的人分别使用 1,2,3编号
-    returnMat,classLabelVector = file2matrix(os.path.dirname(rootDir)+'\\data\\datingTestSet2.txt')
+    returnMat,classLabelVector = file2matrix(dataFullDir)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.scatter(returnMat[:,1],returnMat[:,2])
+    # plt.show()
 
-
+    dataSetColumn2 = returnMat[:,1]
+    normDataSet, ranges, minVals = autoNorm(dataSetColumn2)
+    print(normDataSet)
+    print("最小值为:%f" % minVals)
+    print("最大差值为:%f" % ranges)
+    datingClassTest(dataFullDir)
 
