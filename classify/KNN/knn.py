@@ -101,14 +101,40 @@ def image2vector(filename):
     return returnVect
 
 # kNN识别手写体
-def handWritingClassTest():
+def handWritingClassTest(trainingDataPath,testDataPath):
     hwlabels = []
-    trainingFileList = os.listdir('trainingDigits')
+    trainingFileList = os.listdir(trainingDataPath)
     m = len(trainingFileList)
 
+    trainingMat = np.zeros((m,1024))
+    for i in range(m):
+        fileNameStr = trainingFileList[i]
+        fileStr = fileNameStr.split('.')[0]
+        # 文件名中'_'前半部分为训练数据集标签
+        classNumStr = int(fileStr.split('_')[0])
+        hwlabels.append(classNumStr)
+        trainingMat[i,:] = image2vector(trainingDataPath+'\\%s' % fileNameStr)
 
 
-# 测试classify0方法
+    testFileList = os.listdir(testDataPath)
+    errorCount = 0.0
+    mTest = len(testFileList)
+    for i in range(mTest):
+        fileNameStr = testFileList[i]
+        fileStr = fileNameStr.split('.')[0]
+        classNumStr = int(fileStr.split('_')[0])
+        vectorUnderTest = image2vector(testDataPath+'\\%s' % fileNameStr)
+        # 测试集中1*1024的数值向量与训练集中所有向量求欧式距离,距离最近前k个中出现最多的标签作为样本的估计标签
+        classifierResult = classify0(vectorUnderTest,trainingMat,hwlabels,3)
+
+        if(classifierResult != classNumStr):
+            errorCount += 1.0
+
+    print("\n the total number of errors is: %d" % errorCount)
+    print("\n the total error rate is:%f" % (errorCount/float(mTest)))
+
+
+# 测试classify0方法，手写数字识别测试方法同一放在上级路径test文件中
 if __name__ == '__main__':
     group,labels = createDataSet()
     result = classify0([0,0],group,labels,2)

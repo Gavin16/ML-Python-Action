@@ -1,11 +1,27 @@
-#-*-coding:utf-8-*-
-from numpy import *
+# -*-coding:utf-8-*-
 
-inx = [[1,2,3]]
-# print (inx.shape[0])
+import numpy as np
+import os
+import knn
 
-dataSet = [[1,0],[2,1],[1,1],[2,1],[2,2],[1,2],[2,2]]
-# print(dataSet.__len__())
-padedInx = tile(inx,(dataSet.__len__(),1))
+# 数据储存路径
+trainingDataPath = 'D:\\DataCenter\\document\\ML\\data\\handWritingClassify\\training\\trainingDigits'
+testDataPath = 'D:\\DataCenter\\document\\ML\\data\\handWritingClassify\\test\\testDigits'
 
-print(padedInx)
+fileName = '\\0_0.txt'
+
+# 约会  训练数据存储路径
+datingDataPath = os.path.dirname(os.path.dirname(os.getcwd())) + '\\data\\datingTestSet2.txt'
+
+
+# 测试来自各算法的模型
+def testHandWriting():
+	vector = knn.image2vector(trainingDataPath + fileName)
+	print(vector)
+	knn.handWritingClassTest(trainingDataPath,testDataPath)
+
+if __name__ == '__main__':
+	testHandWriting()
+
+
+
