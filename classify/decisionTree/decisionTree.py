@@ -8,7 +8,7 @@
 # 三步
 
 import math as math
-
+import operator as oprt
 # 计算数据集的经验熵(香农熵/信息量)
 def calcEnt(dataSet):
 	numEntries = len(dataSet)
@@ -72,8 +72,38 @@ def chooseBestFeatureToSplit(dataSet):
 			bestFeature = i
 	return bestFeature
 
+# 统计数据集中分类标签每个标签出现的次数,返回次数最多的标签
+def majorityCount(classList):
+	classCount = {}
+	for vote in classList:
+		if vote not in classCount.keys():
+			classCount[vote] = 0
+			classCount[vote] += 1
+	storedClassCount = sorted(classCount.items(),key=oprt.itemgetter(1),reverse=True)
+	return  sortedClassCount[0][0]
 
-
+# 创建决策树
+def createTree(dataSet,labels):
+	classList = [example[-1] for example in dataSet]
+	# 如果类标签只有一个 返回该类的样例数
+	if classList.count(classList[0]) == len(classList):
+		return classList[0]
+	# 如果数据集中只有一个特征,则无需做特征选择，直接选择出现次数最多的类作为分类结果
+	if len(dataSet[0]) == 1:
+		return majorityCount(classList)
+	bestFeat = chooseBestFeatureToSplit(dataSet)
+	bestFeatLabel = labels[bestFeat]
+	#
+	myTree = {bestFeatLabel:{}}
+	del(labels[bestFeat])
+	# 取出当前最优特征的所有可能取值
+	featValues = [example[bestFeat] for example in dataSet]
+	uniqueVals = set(featValues)
+	for value in uniqueVals:
+		# 复制所有属性名到另一个list用来迭代
+		subLabels = labels[:]
+		myTree[bestFeatLabel][value]=createTree(splitDataSet(dataSet,bestFeat,value),subLabels)
+	return myTree
 
 
 if __name__ == '__main__':
@@ -84,5 +114,6 @@ if __name__ == '__main__':
 	retDataSet = splitDataSet(dataSet,1,1)
 	print(retDataSet)
 	chooseBestFeatureToSplit(dataSet)
-
+	desTree = createTree(dataSet,labels)
+	print(desTree)
 
