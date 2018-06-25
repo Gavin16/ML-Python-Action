@@ -16,12 +16,10 @@ datingDataPath = os.path.dirname(os.path.dirname(os.getcwd())) + '\\data\\dating
 
 # 测试来自各算法的模型
 def testHandWriting():
-	vector = knn.image2vector(trainingDataPath + fileName)
-	print(vector)
-	knn.handWritingClassTest(trainingDataPath,testDataPath)
+    vector = knn.image2vector(trainingDataPath + fileName)
+    print(vector)
+    knn.handWritingClassTest(trainingDataPath, testDataPath)
+
 
 if __name__ == '__main__':
-	testHandWriting()
-
-
-
+    testHandWriting()
