@@ -140,7 +140,7 @@ if __name__ == '__main__':
     # print(os.getcwd())
     # print(os.path.dirname(os.getcwd()))
     rootDir = os.path.dirname(os.getcwd())
-    dataFullDir = os.path.dirname(rootDir) + '\\data\\datingTestSet2.txt'
+    dataFullDir = os.path.dirname(rootDir) + '\\data\\ch02\\datingTestSet2.txt'
     # 不喜欢,魅力一般的人,极具魅力的人分别使用 1,2,3编号
     returnMat, classLabelVector = file2matrix(dataFullDir)
     fig = plt.figure()

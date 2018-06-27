@@ -110,13 +110,27 @@ def createTree(dataSet, labels):
     return myTree
 
 
-if __name__ == '__main__':
-    dataSet, labels = createDataSet()
-    dataEnt = calcEnt(dataSet)
-    print("计算得到数据集的经验熵为：%f" % dataEnt)
+# 使用pickle模块存储决策树
+def storeTree(inputTree,filename):
+    import pickle
+    fw = open(filename,'wb+')
+    pickle.dump(inputTree,fw)
+    fw.close()
 
-    retDataSet = splitDataSet(dataSet, 1, 1)
-    print(retDataSet)
-    chooseBestFeatureToSplit(dataSet)
-    desTree = createTree(dataSet, labels)
-    print(desTree)
+# 从文件中读取决策树
+def grabTree(filename):
+    import pickle
+    fr = open(filename,'rb')
+    return pickle.load(fr)
+
+# if __name__ == '__main__':
+#     dataSet, labels = createDataSet()
+#     dataEnt = calcEnt(dataSet)
+#     print("计算得到数据集的经验熵为：%f" % dataEnt)
+#
+#     retDataSet = splitDataSet(dataSet, 1, 1)
+#     print(retDataSet)
+#     chooseBestFeatureToSplit(dataSet)
+#     desTree = createTree(dataSet, labels)
+#     print(desTree)
+

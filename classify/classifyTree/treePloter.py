@@ -111,10 +111,12 @@ def classify(inputTree, featLabels, testVec):
     return classLabel
 
 
-if __name__ == '__main__':
-    myTree = retrieveTree(0)
-    numOfLeafs = getNumLeafs(myTree)
-    treeDepth = getTreeDepth(myTree)
-    print('numOfLeafs = %d' % numOfLeafs)
-    print('treeDepth = %d' % treeDepth)
-    createPlot(myTree)
+# if __name__ == '__main__':
+#     myTree = retrieveTree(0)
+#     numOfLeafs = getNumLeafs(myTree)
+#     treeDepth = getTreeDepth(myTree)
+#     print('numOfLeafs = %d' % numOfLeafs)
+#     print('treeDepth = %d' % treeDepth)
+#     createPlot(myTree)
+
+
