@@ -24,14 +24,23 @@ def createVocabList(dataSet):
 
 
 def setOfWords2Vec(vocabList, inputSet): \
-        # 创建长度与vocabLis等长的全0列表
-    # 用来记录inputSet中出现且vocabList也有的单词
+    # 创建长度与vocabLis等长的全0列表
+    # 用来记录inputSet中出现且vocabList也有的单词,vocabList有则标记为1 无则标记为0
     returnVec = [0] * len(vocabList)
     for word in inputSet:
         if word in vocabList:
             returnVec[vocabList.index(word)] = 1
         else:
-            print('the word:%s is not in my Vocabulary!' % word)
+            print('the word:%s is not in vocabList!' % word)
+    return returnVec
+
+
+# 朴素贝叶斯词袋模型
+def bagOfWords2VecMN(vocabList,inputSet):
+    returnVec = [0]*len(vocabList)
+    for word in inputSet:
+        if word in vocabList:
+            returnVec[vocabList.index(word)] += 1
     return returnVec
 
 
@@ -49,6 +58,7 @@ def trainNB0(trainMatrix, trainCategory):
     p0Denom = 1.0;
     p1Denom = 1.0
 
+    # 计算每个单词在所属分类中的出现频率 即：后验概率
     for i in range(numTrainDocs):
         if trainCategory[i] == 1:
             p1Num += trainMatrix[i]
@@ -56,15 +66,16 @@ def trainNB0(trainMatrix, trainCategory):
         else:
             p0Num += trainMatrix[i]
             p0Denom += sum(trainMatrix[i])
+
     p1Vect = np.log(p1Num / p1Denom)
     p0Vect = np.log(p0Num / p0Denom)
-
     return p0Vect, p1Vect, pAbusive
 
-
+# 计算贝叶斯估计后验概率值,
 def classifyNB(vec2Classify, p0Vec, p1Vec, pClass1):
     p1 = sum(vec2Classify * p1Vec) + np.log(pClass1)
     p0 = sum(vec2Classify * p0Vec) + np.log(1.0 - pClass1)
+    # 先验概率较大值对应的分类即为预测结果
     if p1 > p0:
         return 1
     else:
@@ -86,56 +97,49 @@ def testingNB():
     thisDoc = np.array(setOfWords2Vec(myVocabList, testEntry))
     print(testEntry, 'classified as:', classifyNB(thisDoc, p0V, p1V, pAb))
 
-# 朴素贝叶斯词袋模型
-def bagOfWords2VecMN(vocabList,inputSet):
-    returnVec = [0]*len(vocabList)
-    for word in inputSet:
-        if word in vocabList:
-            returnVec[vocabList.index(word)] += 1
-    return returnVec
 
 
 # 从文本中解析出单词, 以所有不是数字或者字母的字符划分，过滤掉长度不超过2的字符串
 def textParse(bigString):
     import re
-    listOfTokens = re.split(r'\W*',bigString)
+    listOfTokens = re.split(r'\W+',bigString)
     return [tok.lower() for tok in listOfTokens if len(tok) > 2]
 
+# 垃圾邮件贝叶斯分类
 def spamText():
+    import os
     docList = [];classList = [];fullText = []
-    # 文件的根路径
-    rootDir = os.path.dirname(os.getcwd())
+    # 文件的根路径:项目路径
+    rootDir = os.path.dirname(os.path.dirname(os.getcwd()))
     for i in range(1,26):
         wordList = textParse(open(rootDir+'\\data\\ch04\\spam\\%d.txt' % i).read())
         docList.append(wordList)
         fullText.extend(wordList)
         classList.append(1)
-        wordList = textParse(open(rootDir+'\\data\\cho4\\ham\\%d.txt' % i).read())
-
+        wordList = textParse(open(rootDir+'\\data\\ch04\\ham\\%d.txt' % i).read())
         docList.append(wordList)
         fullText.extend(wordList)
         classList.append(0)
+
     vocabList = createVocabList(docList)
-    trainingSet = range(50);textSet = []
+    trainingSet = list(range(50));testSet = []
 
+    # 从数据集中随机抽取20%（10/50）作为测试集;并从数据集总分离得到测试集
     for i in range(10):
         randIndex = int(np.random.uniform(0,len(trainingSet)))
         testSet.append(trainingSet[randIndex])
-        del(trainingSet[randIndex])
-    trainMat = [];trainClasses = []
+        del trainingSet[randIndex]
 
-    for i in range(10):
-        randIndex = int(np.random.uniform(0,len(trainingSet)))
-        testSet.append(trainingSet[randIndex])
-        del(trainingSet[randIndex])
     trainMat = [];trainClasses = []
 
     for docIndex in trainingSet:
         trainMat.append(setOfWords2Vec(vocabList,docList[docIndex]))
         trainClasses.append(classList[docIndex])
 
+    # 根据训练集训练得到各词出现频率比值
     p0V,p1V,pSpam = trainNB0(np.array(trainMat),np.array(trainClasses))
     errorCount = 0
+    # 使用训练得到的词频序列,对测试集做预测,若结果与标记不一致,记录为分类错误
     for docIndex in testSet:
         wordVector = setOfWords2Vec(vocabList,docList[docIndex])
         if classifyNB(np.array(wordVector),p0V,p1V,pSpam) != classList[docIndex]:
@@ -158,3 +162,4 @@ if __name__ == '__main__':
 
     p0V, p1V, pAb = trainNB0(trainMat, classVec)
     testingNB()
+    spamText()
