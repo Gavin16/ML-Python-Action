@@ -41,6 +41,83 @@ def gradAscent(dataMatIn, classLabels):
         weights = weights + alpha * dataMatrix.transpose() * error
     return weights
 
+# 随机梯度上升算法
+def stocGradAscent0(dataMatrix, classLabels):
+    m,n = np.shape(dataMatrix)
+    alpha = 0.01
+    weights = np.ones(n)   #initialize to all ones
+    for i in range(m):
+        h = sigmoid(sum(dataMatrix[i]*weights))
+        error = classLabels[i] - h
+        delta = alpha * error * np.array(dataMatrix[i])
+        weights = weights + delta
+    return weights
+
+# 改进的随机梯度上升算法
+def stocGradAscent1(dataMatrix, classLabels, numIter=500):
+    m,n = np.shape(dataMatrix)
+    weights = np.ones(n)   #initialize to all ones
+    for j in range(numIter):
+        dataIndex = list(range(m))
+        for i in range(m):
+            alpha = 4/(1.0+j+i)+0.0001    #apha decreases with iteration, does not
+            randIndex = int(np.random.uniform(0,len(dataIndex)))#go to 0 because of the constant
+            h = sigmoid(sum(dataMatrix[randIndex]*weights))
+            error = classLabels[randIndex] - h
+            weights = weights + alpha * error * np.array(dataMatrix[randIndex])
+            del dataIndex[randIndex]
+    return weights
+
+#
+def classifyVector(inX,weights):
+    prob = sigmoid(sum(inX*weights))
+    if prob > 0.5:
+        return 1
+    else:
+        return 0
+
+# 从疝气病症预测病马的死亡率
+def colicTest():
+    import os
+    folderDir = os.path.dirname(os.getcwd())
+    rootDir = os.path.dirname(folderDir)
+    frTrain = open(rootDir + '\\data\\ch05\\horseColicTraining.txt')
+    frTest = open(rootDir + '\\data\\ch05\\horseColicTest.txt')
+    trainingSet = []
+    trainingLabels = []
+
+    for line in frTrain.readlines():
+        currLine = line.strip().split('\t')
+        lineArr = []
+        for i in range(21):
+            lineArr.append(float(currLine[i]))
+
+        trainingSet.append(lineArr)
+        trainingLabels.append(float(currLine[21]))
+    trainWeights = stocGradAscent1(np.array(trainingSet),trainingLabels,1000)
+    errorCount = 0
+    numTestVec = 0.0
+    for line in frTest.readlines():
+        numTestVec += 1.0
+        currLine = line.strip().split('\t')
+        lineArr = []
+        for i in range(21):
+            lineArr.append(float(currLine[i]))
+        if int(classifyVector(np.array(lineArr),trainWeights)) != int(currLine[21]):
+            errorCount += 1
+    errorRate = (float(errorCount)/numTestVec)
+    print('the error rate of this test is :%f' % errorRate)
+    return errorRate
+
+# 多次测试
+def multiTest():
+    numTests = 10
+    errorSum = 0.0
+    for k in range(numTests):
+        errorSum += colicTest()
+    print('after %d iterations the average error rate is: %f' %(numTests,errorSum/float(numTests)))
+
+
 # 画出数据集和Logistic回归最佳拟合直线的函数
 def plotBestFit(weights):
     import matplotlib.pyplot as plt
@@ -77,11 +154,13 @@ def plotBestFit(weights):
     plt.ylabel('X2')
     plt.show()
 
-
-
-
 if __name__ == '__main__':
     dataMat, labelMat = loadDataSet()
     weights = gradAscent(dataMat, labelMat)
     print(weights)
-    plotBestFit(weights)
+    # plotBestFit(weights)
+    # weights1 = stocGradAscent0(dataMat,labelMat)
+    # plotBestFit(weights1)
+    # weights2 = stocGradAscent1(dataMat,labelMat)
+    # plotBestFit(weights2)
+    multiTest()
